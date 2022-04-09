@@ -10,7 +10,7 @@ const COMPARE_NUMS_SECONDARY_COLOR = 2;
 
 const NUMBER_OF_ARRAY_BARS = 95;
 
-const ANIMATION_SPEED_MS = 5;
+const ANIMATION_SPEED_MS = 10;
 
 
 
@@ -36,18 +36,40 @@ export default class SortingVisualizer extends React.Component {
         // Merge the temp arrays back into array[left..right]
         while (indexOfSubArrayOne < leftArray.length && indexOfSubArrayTwo < rightArray.length) {
 
-            animations.push([left + indexOfSubArrayOne, mid + 1 + indexOfSubArrayTwo]);
-            animations.push([left + indexOfSubArrayOne, mid + 1 + indexOfSubArrayTwo]);
+            animations.push({
+                index: left + indexOfSubArrayOne,
+                action: COMPARE_NUMS_SECONDARY_COLOR
+            });
+            animations.push({
+                index: mid + 1 + indexOfSubArrayTwo,
+                action: COMPARE_NUMS_SECONDARY_COLOR
+            });
+            animations.push({
+                index: left + indexOfSubArrayOne,
+                action: COMPARE_NUMS_PRIMARY_COLOR
+            });
+            animations.push({
+                index: mid + 1 + indexOfSubArrayTwo,
+                action: COMPARE_NUMS_PRIMARY_COLOR
+            });
 
             if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
 
-                animations.push([indexOfMergedArray, leftArray[indexOfSubArrayOne]]);
+                animations.push({
+                    index: indexOfMergedArray,
+                    value: leftArray[indexOfSubArrayOne],
+                    action: SWAMP_NUMS
+                });
 
                 array[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
                 indexOfSubArrayOne++;
             }
             else {
-                animations.push([indexOfMergedArray, rightArray[indexOfSubArrayTwo]]);
+                animations.push({
+                    index: indexOfMergedArray,
+                    value: rightArray[indexOfSubArrayTwo],
+                    action: SWAMP_NUMS
+                });
                 array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
                 indexOfSubArrayTwo++;
             }
@@ -57,9 +79,21 @@ export default class SortingVisualizer extends React.Component {
         // left[], if there are any
         while (indexOfSubArrayOne < leftArray.length) {
 
-            animations.push([left + indexOfSubArrayOne, left + indexOfSubArrayOne]);
-            animations.push([left + indexOfSubArrayOne, left + indexOfSubArrayOne]);
-            animations.push([indexOfMergedArray, leftArray[indexOfSubArrayOne]]);
+            animations.push({
+                index: left + indexOfSubArrayOne,
+                action: COMPARE_NUMS_SECONDARY_COLOR
+            });
+
+            animations.push({
+                index: left + indexOfSubArrayOne,
+                action: COMPARE_NUMS_PRIMARY_COLOR
+            });
+
+            animations.push({
+                index: indexOfMergedArray,
+                value: leftArray[indexOfSubArrayOne],
+                action: SWAMP_NUMS
+            });
 
             array[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
             indexOfSubArrayOne++;
@@ -69,9 +103,21 @@ export default class SortingVisualizer extends React.Component {
         // right[], if there are any
         while (indexOfSubArrayTwo < rightArray.length) {
 
-            animations.push([mid + 1 + indexOfSubArrayTwo, mid + 1 + indexOfSubArrayTwo]);
-            animations.push([mid + 1 + indexOfSubArrayTwo, mid + 1 + indexOfSubArrayTwo]);
-            animations.push([indexOfMergedArray, rightArray[indexOfSubArrayTwo]]);
+            animations.push({
+                index: mid + 1 + indexOfSubArrayTwo,
+                action: COMPARE_NUMS_SECONDARY_COLOR
+            });
+
+            animations.push({
+                index: mid + 1 + indexOfSubArrayTwo,
+                action: COMPARE_NUMS_PRIMARY_COLOR
+            });
+
+            animations.push({
+                index: indexOfMergedArray,
+                value: rightArray[indexOfSubArrayTwo],
+                action: SWAMP_NUMS
+            });
 
 
             array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
@@ -92,9 +138,17 @@ export default class SortingVisualizer extends React.Component {
 
     swap(array, a, b, animations) {
 
-        animations.push([a,b]);
-        animations.push([a,b]);
-        animations.push([a,b]);
+        animations.push({
+            action : SWAMP_NUMS,
+            index : a,
+            value : array[b]
+        });
+        
+        animations.push({
+            action : SWAMP_NUMS,
+            index : b,
+            value : array[a]
+        })
 
         let h = array[a];
         array[a] = array[b];
@@ -104,14 +158,30 @@ export default class SortingVisualizer extends React.Component {
     partition(array, low, high, animations) {
         let pivot = array[high];
         let i = low - 1;
-
+        animations.push({
+            action : COMPARE_NUMS_SECONDARY_COLOR,
+            index : high
+        });
         for (let j = low; j <= high - 1; j++) {
+            animations.push({
+                action : COMPARE_NUMS_SECONDARY_COLOR,
+                index : j
+            });
             if (array[j] < pivot) {
                 i++;
                 this.swap(array, i, j, animations);
             }
+            animations.push({
+                action : COMPARE_NUMS_PRIMARY_COLOR,
+                index : j
+            });
         }
         this.swap(array, i + 1, high, animations);
+
+        animations.push({
+            action : COMPARE_NUMS_PRIMARY_COLOR,
+            index : high
+        });
         return (i + 1);
     }
 
@@ -121,28 +191,22 @@ export default class SortingVisualizer extends React.Component {
 
             this.quickSort(array, low, pi - 1, animations);
             this.quickSort(array, pi + 1, high, animations);
-
         }
     }
 
     animateActions(animations) {
         for (let i = 0; i < animations.length; i++) {
             const arrayBars = document.getElementsByClassName('array-bar');
-            const isColorChange = i % 3 !== 2;
-            if (isColorChange) {
-                const [barOneIdx, barTwoIdx] = animations[i];
-                const barOneStyle = arrayBars[barOneIdx].style;
-                const barTwoStyle = arrayBars[barTwoIdx].style;
-                const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
+            if (animations[i].action !== SWAMP_NUMS) {
+                const barOneStyle = arrayBars[animations[i].index].style;
+                const color = animations[i].action === COMPARE_NUMS_SECONDARY_COLOR ? SECONDARY_COLOR : PRIMARY_COLOR;
                 setTimeout(() => {
                     barOneStyle.backgroundColor = color;
-                    barTwoStyle.backgroundColor = color;
                 }, i * ANIMATION_SPEED_MS);
             } else {
                 setTimeout(() => {
-                    const [barOneIdx, newHeight] = animations[i];
-                    const barOneStyle = arrayBars[barOneIdx].style;
-                    barOneStyle.height = `${newHeight}px`;
+                    const barOneStyle = arrayBars[animations[i].index].style;
+                    barOneStyle.height = `${animations[i].value}px`;
                 }, i * ANIMATION_SPEED_MS);
             }
         }
@@ -152,15 +216,15 @@ export default class SortingVisualizer extends React.Component {
         let array = this.state.array.slice();
         let animations = [];
         this.mergeSort(array, 0, array.length - 1, animations);
-        this.animateActions(animations, array);
+        this.animateActions(animations);
     }
 
-    quickSortAlgorithm(){
+    quickSortAlgorithm() {
         let array = this.state.array.slice();
         let animations = [];
-        this.quickSort(array, 0, array.length -1, animations);
+        this.quickSort(array, 0, array.length - 1, animations);
+        this.animateActions(animations);
         
-        this.setState({ array });
     }
 
     testSortingAlgorithms() {
