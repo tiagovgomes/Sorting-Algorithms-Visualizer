@@ -10,7 +10,7 @@ const COMPARE_NUMS_SECONDARY_COLOR = 2;
 
 const NUMBER_OF_ARRAY_BARS = 95;
 
-const ANIMATION_SPEED_MS = 10;
+const ANIMATION_SPEED_MS = 5;
 
 
 
@@ -139,48 +139,48 @@ export default class SortingVisualizer extends React.Component {
     swap(array, a, b, animations) {
 
         animations.push({
-            action : SWAMP_NUMS,
-            index : a,
-            value : array[b]
+            action: SWAMP_NUMS,
+            index: a,
+            value: array[b]
         });
-        
+
         animations.push({
-            action : SWAMP_NUMS,
-            index : b,
-            value : array[a]
+            action: SWAMP_NUMS,
+            index: b,
+            value: array[a]
         })
 
-        let h = array[a];
+        let temp = array[a];
         array[a] = array[b];
-        array[b] = h;
+        array[b] = temp;
     }
 
     partition(array, low, high, animations) {
         let pivot = array[high];
         let i = low - 1;
         animations.push({
-            action : COMPARE_NUMS_SECONDARY_COLOR,
-            index : high
+            action: COMPARE_NUMS_SECONDARY_COLOR,
+            index: high
         });
         for (let j = low; j <= high - 1; j++) {
             animations.push({
-                action : COMPARE_NUMS_SECONDARY_COLOR,
-                index : j
+                action: COMPARE_NUMS_SECONDARY_COLOR,
+                index: j
             });
             if (array[j] < pivot) {
                 i++;
                 this.swap(array, i, j, animations);
             }
             animations.push({
-                action : COMPARE_NUMS_PRIMARY_COLOR,
-                index : j
+                action: COMPARE_NUMS_PRIMARY_COLOR,
+                index: j
             });
         }
         this.swap(array, i + 1, high, animations);
 
         animations.push({
-            action : COMPARE_NUMS_PRIMARY_COLOR,
-            index : high
+            action: COMPARE_NUMS_PRIMARY_COLOR,
+            index: high
         });
         return (i + 1);
     }
@@ -212,6 +212,41 @@ export default class SortingVisualizer extends React.Component {
         }
     }
 
+    bubbleSort(array, length, animations) {
+        for (let i = 0; i < length - 1; i++) {
+            for (let j = 0; j < length - i - 1; j++) {
+                animations.push({
+                    action: COMPARE_NUMS_SECONDARY_COLOR,
+                    index: j
+                });
+                animations.push({
+                    action: COMPARE_NUMS_SECONDARY_COLOR,
+                    index: j + 1
+                });
+                if (array[j] > array[j + 1]) {
+                    this.swap(array, j, j + 1, animations);
+
+                }
+                animations.push({
+                    action: COMPARE_NUMS_PRIMARY_COLOR,
+                    index: j
+                });
+                animations.push({
+                    action: COMPARE_NUMS_PRIMARY_COLOR,
+                    index: j + 1
+                });
+            }
+            
+        }
+    }
+
+    bubbleSortAlgorithm() {
+        let array = this.state.array.slice();
+        let animations = [];
+        this.bubbleSort(array,array.length, animations);
+        this.animateActions(animations);
+    }
+
     mergeSortAlgorithm() {
         let array = this.state.array.slice();
         let animations = [];
@@ -224,7 +259,7 @@ export default class SortingVisualizer extends React.Component {
         let animations = [];
         this.quickSort(array, 0, array.length - 1, animations);
         this.animateActions(animations);
-        
+
     }
 
     testSortingAlgorithms() {
@@ -262,7 +297,7 @@ export default class SortingVisualizer extends React.Component {
                 <button onClick={() => this.mergeSortAlgorithm()}>Merge Sort</button>
                 <button onClick={() => this.quickSortAlgorithm()}>Quick Sort</button>
                 <button onClick={() => this.heapSort()}>Heap Sort</button>
-                <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
+                <button onClick={() => this.bubbleSortAlgorithm()}>Bubble Sort</button>
                 <button onClick={() => this.testSortingAlgorithms()}>
                     Test Sorting Algorithms (BROKEN)
                 </button>
