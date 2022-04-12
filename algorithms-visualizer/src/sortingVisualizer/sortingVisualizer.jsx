@@ -1,5 +1,11 @@
 import React from 'react';
-import './sortingVisualizer.css';
+import './sortingVisualizer.scss';
+import Typography from '@mui/material/Typography';
+import Slider from '@mui/material/Slider';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+
+//sorting algorithms learned from https://www.geeksforgeeks.org/
 
 const PRIMARY_COLOR = 'turquoise';
 const SECONDARY_COLOR = 'red';
@@ -8,7 +14,6 @@ const SWAMP_NUMS = 0;
 const COMPARE_NUMS_PRIMARY_COLOR = 1;
 const COMPARE_NUMS_SECONDARY_COLOR = 2;
 
-const NUMBER_OF_ARRAY_BARS = 95;
 
 const ANIMATION_SPEED_MS = 5;
 
@@ -20,6 +25,7 @@ export default class SortingVisualizer extends React.Component {
 
         this.state = {
             array: [],
+            numberOfBars: 95
         };
     }
 
@@ -236,14 +242,14 @@ export default class SortingVisualizer extends React.Component {
                     index: j + 1
                 });
             }
-            
+
         }
     }
 
     bubbleSortAlgorithm() {
         let array = this.state.array.slice();
         let animations = [];
-        this.bubbleSort(array,array.length, animations);
+        this.bubbleSort(array, array.length, animations);
         this.animateActions(animations);
     }
 
@@ -272,37 +278,53 @@ export default class SortingVisualizer extends React.Component {
 
     resetArray() {
         const array = [];
-        for (let i = 0; i < NUMBER_OF_ARRAY_BARS; i++) {
-            array.push(randomIntFromInterval(5, 730));
+        for (let i = 0; i < this.state.numberOfBars; i++) {
+            array.push(randomIntFromInterval(5, 500));
         }
         this.setState({ array });
+        console.log(this.state);
     }
+
+    handleChange = (event, value) => {
+        this.setState({ numberOfBars: value });
+        this.resetArray();
+    };
 
 
     render() {
         const { array } = this.state;
 
         return (
-            <div className="array-container">
-                {array.map((value, idx) => (
-                    <div
-                        className="array-bar"
-                        key={idx}
-                        style={{
-                            backgroundColor: PRIMARY_COLOR,
-                            height: `${value}px`,
-                        }}></div>
-                ))}
-                <button onClick={() => this.resetArray()}>Generate New Array</button>
-                <button onClick={() => this.mergeSortAlgorithm()}>Merge Sort</button>
-                <button onClick={() => this.quickSortAlgorithm()}>Quick Sort</button>
-                <button onClick={() => this.heapSort()}>Heap Sort</button>
-                <button onClick={() => this.bubbleSortAlgorithm()}>Bubble Sort</button>
-                <button onClick={() => this.testSortingAlgorithms()}>
-                    Test Sorting Algorithms (BROKEN)
-                </button>
-
+            <div className="visualizer-container">
+                <div className="button-and-visualizer-container">
+                    <ButtonGroup className="button-group-container"  orientation="vertical" variant="contained" aria-label="outlined primary button group">
+                        <Button onClick={() => this.resetArray()}>Generate New Array</Button>
+                        <Button onClick={() => this.mergeSortAlgorithm()}>Merge Sort</Button>
+                        <Button onClick={() => this.quickSortAlgorithm()}>Quick Sort</Button>
+                        <Button onClick={() => this.heapSort()}>Heap Sort</Button>
+                        <Button onClick={() => this.bubbleSortAlgorithm()}>Bubble Sort</Button>
+                    </ButtonGroup>
+                    <div className="array-container">
+                        {array.map((value, idx) => (
+                            <div
+                                className="array-bar"
+                                key={idx}
+                                style={{
+                                    backgroundColor: PRIMARY_COLOR,
+                                    height: `${value}px`,
+                                }}>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="slider-container">
+                    <Typography id="input-slider" gutterBottom>
+                        Number of bars
+                    </Typography>
+                    <Slider onChange={this.handleChange} aria-labelledby="input-slider" valueLabelDisplay="on" defaultValue={95} min={20} max={200} aria-label="Default" />
+                </div>
             </div>
+
         );
     }
 }

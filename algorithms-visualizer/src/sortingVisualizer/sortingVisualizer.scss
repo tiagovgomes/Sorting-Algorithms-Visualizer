@@ -1,0 +1,25 @@
+.visualizer-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+
+  .button-and-visualizer-container {
+    display: inline-flex;
+
+    .button-group-container{
+      align-self: center;
+      margin-right: 10px;
+    }
+  }
+
+  .slider-container {}
+
+  .array-container {
+  }
+
+  .array-bar {
+    width: 2px;
+    display: inline-block;
+    margin: 0 1px;
+  }
+}
