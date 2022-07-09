@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './sortingVisualizer.scss';
 import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
@@ -14,20 +14,17 @@ const ANIMATION_SPEED_MS = 4;
 
 
 
-export default class SortingVisualizer extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            array: [],
-            numberOfBars: 95
-        };
-    }
+export default function SortingVisualizer() {
+    const [array, setArray] = useState([]);
+    const [numberOfBars, setNumberOfBars] = useState(95);
 
 
+    useEffect(() => {
+        resetArray();
+    }, []);
 
 
-    animateActions(animations) {
+    function animateActions(animations) {
         for (let i = 0; i < animations.length; i++) {
             const arrayBars = document.getElementsByClassName('array-bar');
             if (animations[i].action !== algos.SWAMP_NUMS) {
@@ -46,80 +43,78 @@ export default class SortingVisualizer extends React.Component {
     }
 
 
-    sortAlgorithm(algorithm) {
-        let array = this.state.array.slice();
+    function sortAlgorithm(algorithm) {
+        let arrayCopy = array.slice();
         let animations = [];
         switch (algorithm) {
             case 'Quick':
-                algos.quickSort(array, 0, array.length - 1, animations);
+                algos.quickSort(arrayCopy, 0, arrayCopy.length - 1, animations);
                 break;
             case 'Heap':
-                algos.heapSort(array, animations);
+                algos.heapSort(arrayCopy, animations);
                 break;
             case 'Merge':
-                algos.mergeSort(array, 0, array.length - 1, animations);
+                algos.mergeSort(arrayCopy, 0, arrayCopy.length - 1, animations);
                 break;
             case 'Bubble':
-                algos.bubbleSort(array, array.length, animations);
+                algos.bubbleSort(arrayCopy, arrayCopy.length, animations);
+                break;
+            default:
                 break;
         }
-        this.animateActions(animations);
+        animateActions(animations);
     }
 
-    componentDidMount() {
-        this.resetArray();
-    }
 
-    resetArray() {
+
+    function resetArray() {
         const array = [];
-        for (let i = 0; i < this.state.numberOfBars; i++) {
+        for (let i = 0; i < numberOfBars; i++) {
             array.push(randomIntFromInterval(5, 500));
         }
-        this.setState({ array });
+        setArray(array);
     }
 
-    handleChange = (event, value) => {
-        this.setState({ numberOfBars: value });
-        this.resetArray();
+    function handleChange(event, value) {
+        setNumberOfBars(value);
+        resetArray();
     };
 
 
-    render() {
-        const { array } = this.state;
 
-        return (
-            <div className="visualizer-container">
-                <div className="button-and-visualizer-container">
-                    <ButtonGroup className="button-group-container" orientation="vertical" variant="contained" aria-label="outlined primary button group">
-                        <Button onClick={() => this.resetArray()}>Generate New Array</Button>
-                        <Button onClick={() => this.sortAlgorithm('Merge')}>Merge Sort</Button>
-                        <Button onClick={() => this.sortAlgorithm('Quick')}>Quick Sort</Button>
-                        <Button onClick={() => this.sortAlgorithm('Heap')}>Heap Sort</Button>
-                        <Button onClick={() => this.sortAlgorithm('Bubble')}>Bubble Sort</Button>
-                    </ButtonGroup>
-                    <div className="array-container">
-                        {array.map((value, idx) => (
-                            <div
-                                className="array-bar"
-                                key={idx}
-                                style={{
-                                    backgroundColor: PRIMARY_COLOR,
-                                    height: `${value}px`,
-                                }}>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div className="slider-container">
-                    <Typography id="input-slider" gutterBottom>
-                        Number of bars
-                    </Typography>
-                    <Slider onChange={this.handleChange} aria-labelledby="input-slider" valueLabelDisplay="on" defaultValue={95} min={20} max={200} aria-label="Default" />
+    return (
+        <div className="visualizer-container">
+            <div className="button-and-visualizer-container">
+                <ButtonGroup className="button-group-container" orientation="vertical" variant="contained" aria-label="outlined primary button group">
+                    <Button onClick={() => resetArray()}>Generate New Array</Button>
+                    <Button onClick={() => sortAlgorithm('Merge')}>Merge Sort</Button>
+                    <Button onClick={() => sortAlgorithm('Quick')}>Quick Sort</Button>
+                    <Button onClick={() => sortAlgorithm('Heap')}>Heap Sort</Button>
+                    <Button onClick={() => sortAlgorithm('Bubble')}>Bubble Sort</Button>
+                </ButtonGroup>
+                <div className="array-container">
+                    {array.map((value, idx) => (
+                        <div
+                            className="array-bar"
+                            key={idx}
+                            style={{
+                                backgroundColor: PRIMARY_COLOR,
+                                height: `${value}px`,
+                            }}>
+                        </div>
+                    ))}
                 </div>
             </div>
+            <div className="slider-container">
+                <Typography id="input-slider" gutterBottom>
+                    Number of bars
+                </Typography>
+                <Slider onChange={handleChange} aria-labelledby="input-slider" valueLabelDisplay="on" defaultValue={95} min={20} max={200} aria-label="Default" />
+            </div>
+        </div>
 
-        );
-    }
+    );
+
 }
 
 function randomIntFromInterval(min, max) {
